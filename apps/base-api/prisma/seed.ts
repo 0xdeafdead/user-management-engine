@@ -2,6 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaClient } from '@prisma/client';
 import dayjs from 'dayjs';
+import { genSalt, hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -71,7 +72,7 @@ async function main() {
     {
       id: devRoleId,
       name: 'Dev',
-      permissions: permissions.map((permission) => ({
+      permissions: devPermissions.map((permission) => ({
         assignedBy: 'system',
         assignedAt: dayjs().toDate(),
         permissionId: permission.id,
@@ -88,6 +89,46 @@ async function main() {
         permissions: {
           createMany: { data: role.permissions, skipDuplicates: true },
         },
+      },
+    });
+  }
+
+  const users = [
+    { email: 'admin@test.com', firstName: 'Admin', lastName: 'User' },
+    { email: 'user@test.com', firstName: 'Dev', lastName: 'User' },
+  ];
+
+  for (const user of users) {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {},
+      create: {
+        id: uuidv4(),
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        userRole: {
+          create: {
+            roleId: adminRoleId,
+          },
+        },
+      },
+    });
+  }
+
+  const credentials = [
+    { email: 'admin@test.com', salt: await genSalt(), password: 'admin' },
+    { email: 'user@test.com', salt: await genSalt(), password: 'user' },
+  ];
+
+  for (const credential of credentials) {
+    await prisma.credential.upsert({
+      where: { email: credential.email },
+      update: {},
+      create: {
+        email: credential.email,
+        salt: credential.salt,
+        password: await hash(credential.password, credential.salt),
       },
     });
   }

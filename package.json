@@ -9,6 +9,9 @@
     "prisma:generate": "npx prisma generate --schema=apps/base-api/prisma/schema.prisma",
     "prisma:migrate": "npx prisma migrate dev --schema=apps/base-api/prisma/schema.prisma"
   },
+  "prisma":{
+    "seed": "ts-node --compiler-options {\"module\":\"commonjs\"} --transpile-only apps/base-api/prisma/seed.ts"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",
