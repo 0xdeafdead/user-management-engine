@@ -94,27 +94,37 @@ async function main() {
   }
 
   const users = [
-    { email: 'admin@test.com', firstName: 'Admin', lastName: 'User' },
-    { email: 'user@test.com', firstName: 'Dev', lastName: 'User' },
+    {
+      id: uuidv4(),
+      email: 'admin@test.com',
+      firstName: 'Dev',
+      lastName: 'User',
+    },
+    {
+      id: uuidv4(),
+      email: 'user@test.com',
+      firstName: 'User',
+      lastName: 'User',
+    },
   ];
 
-  for (const user of users) {
-    await prisma.user.upsert({
-      where: { email: user.email },
-      update: {},
-      create: {
-        id: uuidv4(),
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        userRole: {
-          create: {
-            roleId: adminRoleId,
-          },
-        },
-      },
-    });
-  }
+  await prisma.user.upsert({
+    where: { id: users[0].id },
+    update: {},
+    create: {
+      ...users[0],
+      userRole: { create: { roleId: adminRoleId } },
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { id: users[1].id },
+    update: {},
+    create: {
+      ...users[1],
+      userRole: { create: { roleId: userRoleId } },
+    },
+  });
 
   const credentials = [
     { email: 'admin@test.com', salt: await genSalt(), password: 'admin' },
