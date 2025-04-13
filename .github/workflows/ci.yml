@@ -12,6 +12,14 @@ on:
 jobs:
   build-lint-test:
     runs-on: ubuntu-latest
+    environment: dev
+    env:
+      PORT: ${{ vars.PORT}}
+      JWT_SECRET: ${{ vars.JWT_SECRET}}
+      BASE_API_AUDIENCE: ${{vars.BASE_API_AUDIENCE}}
+      BASE_API_ISSUER: ${{vars.BASE_API_ISSUER}}
+      APP_ENV: ${{vars.APP_ENV}}
+      USER_ROLE_ID: ${{vars.USER_ROLE_ID}}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,9 +29,10 @@ jobs:
         with:
           node-version: lts/iron
       - run: npm ci
-      - run: npx nx run-many --target=lint --parallel=5 --base=origin/staging
-      - run: npx nx run-many --target=build --parallel=5 --base=origin/staging
-      - run: npx nx run-many --target=test --parallel=false --codeCoverage --verbose
+      - run: npx prisma generate --schema=apps/base-api/prisma/schema.prisma
+      - run: npx nx run-many --target=lint --parallel=5 --base=origin/staging --verbose
+      - run: npx nx run-many --target=build --parallel=5 --base=origin/staging --verbose
+      - run: npx nx run-many --target=test --parallel=5 --codeCoverage --verbose
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

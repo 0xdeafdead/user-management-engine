@@ -89,7 +89,7 @@ describe('UserController', () => {
   });
 
   describe('updateUser', () => {
-    const email: string = 'user_01@test.com';
+    const email = 'user_01@test.com';
     const updateUserDTO: UpdateUserDTO = {
       firstName: 'testName',
       lastName: 'testLastName',

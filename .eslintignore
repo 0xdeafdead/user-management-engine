@@ -1,1 +1,3 @@
 node_modules
+apps/**/jest.config.ts
+libs/**/jest.config.ts
